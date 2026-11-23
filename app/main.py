@@ -1,20 +1,22 @@
-from fastapi import FastAPI 
-from pydantic import BaseModel 
 import os
 import aio_pika
 from dotenv import load_dotenv
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 load_dotenv()
 RABBIT_URL = os.getenv("RABBIT_URL")
 
-app = FastAPI(title="RabbitMQ Lab 7") 
+app = FastAPI(title="RabbitMQ Lab 7")
 
-class OrderRequest(BaseModel): 
-    order_id: int 
-    product: str 
-    quantity: int 
-@app.post("/orders", status_code=202) 
-async def submit_order(order: OrderRequest): 
+class OrderRequest(BaseModel):
+    order_id: int
+    product: str
+    quantity: int
+    delivery_method: str
+
+@app.post("/orders", status_code=202)
+async def submit_order(order: OrderRequest):
     connection = await aio_pika.connect_robust(RABBIT_URL)
     async with connection:
         channel = await connection.channel(publisher_confirms=True)
